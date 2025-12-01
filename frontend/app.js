@@ -1,6 +1,7 @@
 const API = "https://bmi-new-ui.onrender.com";
 
 // Elements
+
 const unitSelect = document.getElementById("unit");
 const heightMetric = document.getElementById("height-metric");
 const heightImperial = document.getElementById("height-imperial");
@@ -86,3 +87,26 @@ document.getElementById("calcBtn").addEventListener("click", async () => {
     errorEl.textContent = "Error: " + e.message;
   }
 });
+const dob = document.getElementById("dob").value;
+const gender = document.getElementById("gender").value;
+
+const res = await fetch(`${API}/api/calculate`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    height,
+    weight,
+    unit,
+    dob,
+    gender
+  })
+});
+const data = await res.json();
+
+// Update UI
+document.getElementById("bmiVal").textContent = data.bmi;
+document.getElementById("suggestedBMI").textContent = `Suggested BMI: ${data.suggested_bmi_min} - ${data.suggested_bmi_max}`;
+document.getElementById("suggestedWeight").textContent = `Suggested weight: ${data.suggested_weight_min} - ${data.suggested_weight_max} kg`;
+document.getElementById("bmiStatus").textContent = `Status: ${data.status}`;
+
+
