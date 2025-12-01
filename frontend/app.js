@@ -1,15 +1,16 @@
-const API = "https://bmi-new-ui.onrender.com";
-
-// Elements
+const API = "https://bmi-new-ui.onrender.com"; // replace with your backend URL
 
 const unitSelect = document.getElementById("unit");
 const heightMetric = document.getElementById("height-metric");
 const heightImperial = document.getElementById("height-imperial");
-const errorEl = document.getElementById("error");
+const calcBtn = document.getElementById("calcBtn");
+const dobEl = document.getElementById("dob");
+const genderEl = document.getElementById("gender");
+const bmiChartCtx = document.getElementById("bmiChart").getContext("2d");
+let bmiChart;
 
-// Toggle inputs for metric/imperial
 unitSelect.addEventListener("change", () => {
-  if(unitSelect.value === "metric") {
+  if (unitSelect.value === "metric") {
     heightMetric.classList.remove("hidden");
     heightImperial.classList.add("hidden");
   } else {
@@ -18,95 +19,75 @@ unitSelect.addEventListener("change", () => {
   }
 });
 
-// BMI history (frontend only)
-const history = [];
-function addHistory(bmi, category) {
-  history.push({bmi, category});
-  let chart = document.getElementById("historyChart");
-  if(!chart){
-    chart = document.createElement("div");
-    chart.id = "historyChart";
-    chart.className = "mt-4 p-4 bg-gray-100 rounded";
-    document.querySelector("body > div").appendChild(chart);
-  }
-  chart.innerHTML = history.map((h,i)=>`#${i+1}: BMI=${h.bmi}, ${h.category}`).join("<br>");
+async function fetchHistory() {
+  try {
+    const res = await fetch(`${API}/api/history`);
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+
+    const labels = data.map((e, i) => `#${i + 1} (${new Date(e.created_at).toLocaleDateString()})`);
+    const bmiData = data.map(e => e.bmi);
+
+    if (bmiChart) bmiChart.destroy();
+    bmiChart = new Chart(bmiChartCtx, {
+      type: 'line',
+      data: { labels, datasets: [{ label: 'BMI Trend', data: bmiData, borderColor: 'blue', backgroundColor: 'rgba(0,0,255,0.1)', fill: true, tension: 0.3 }] },
+      options: { responsive: true, plugins: { legend: { display: true } } }
+    });
+  } catch (e) { console.log(e); }
 }
 
-// Calculate button click
-document.getElementById("calcBtn").addEventListener("click", async () => {
-  errorEl.textContent = "";
+function showAdvice(status) {
+  const adviceEl = document.getElementById("advice");
+  const messages = {
+    underweight: "Increase calories & protein intake.",
+    normal: "Maintain a healthy lifestyle.",
+    overweight: "Increase cardio & monitor diet."
+  };
+  adviceEl.textContent = messages[status] || "";
+  adviceEl.classList.remove("hidden");
+}
+
+calcBtn.addEventListener("click", async () => {
   const unit = unitSelect.value;
   let height, weight;
 
   weight = parseFloat(document.getElementById("weight").value);
-  if(!weight || weight <= 0){
-    errorEl.textContent = "Enter valid weight";
-    return;
-  }
+  if (!weight || weight <= 0) { alert("Enter valid weight"); return; }
 
-  if(unit === "metric"){
+  if (unit === "metric") {
     height = parseFloat(document.getElementById("height-cm").value);
-    if(!height || height <= 0){
-      errorEl.textContent = "Enter valid height in cm";
-      return;
-    }
+    if (!height || height <= 0) { alert("Enter valid height"); return; }
+    height = height / 100; // convert cm to meters
   } else {
     const ft = parseFloat(document.getElementById("height-ft").value);
     const inch = parseFloat(document.getElementById("height-in").value);
-    if(ft < 0 || inch < 0){
-      errorEl.textContent = "Enter valid height in ft/in";
-      return;
-    }
-    height = ft * 12 + inch; // total inches for backend
+    if (ft < 0 || inch < 0) { alert("Enter valid height"); return; }
+    height = ft * 12 + inch; // inches
   }
+
+  const dob = dobEl.value;
+  const gender = genderEl.value;
+  if (!dob || !gender) { alert("Enter DOB and select gender"); return; }
 
   try {
     const res = await fetch(`${API}/api/calculate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ height, weight, unit })
+      body: JSON.stringify({ height, weight, unit, dob, gender })
     });
-    if(!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
 
-    const bmiEl = document.getElementById("bmiVal");
-    const catEl = document.getElementById("category");
-    const rangeEl = document.getElementById("range");
-    const resultEl = document.getElementById("result");
+    document.getElementById("bmiVal").textContent = data.bmi;
+    document.getElementById("suggestedBMI").textContent = `Suggested BMI: ${data.suggested_bmi_min} - ${data.suggested_bmi_max}`;
+    document.getElementById("suggestedWeight").textContent = `Suggested weight: ${data.suggested_weight_min} - ${data.suggested_weight_max} kg`;
+    document.getElementById("bmiStatus").textContent = `Status: ${data.status}`;
+    document.getElementById("result").classList.remove("hidden");
 
-    if(bmiEl && catEl && rangeEl && resultEl){
-      bmiEl.textContent = data.bmi;
-      catEl.textContent = data.category;
-      rangeEl.textContent = data.healthy_range;
-      resultEl.classList.remove("hidden");
-    }
-
-    addHistory(data.bmi, data.category);
-
-  } catch(e) {
-    errorEl.textContent = "Error: " + e.message;
-  }
+    showAdvice(data.status);
+    fetchHistory();
+  } catch (e) { alert("Error: " + e.message); }
 });
-const dob = document.getElementById("dob").value;
-const gender = document.getElementById("gender").value;
 
-const res = await fetch(`${API}/api/calculate`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    height,
-    weight,
-    unit,
-    dob,
-    gender
-  })
-});
-const data = await res.json();
-
-// Update UI
-document.getElementById("bmiVal").textContent = data.bmi;
-document.getElementById("suggestedBMI").textContent = `Suggested BMI: ${data.suggested_bmi_min} - ${data.suggested_bmi_max}`;
-document.getElementById("suggestedWeight").textContent = `Suggested weight: ${data.suggested_weight_min} - ${data.suggested_weight_max} kg`;
-document.getElementById("bmiStatus").textContent = `Status: ${data.status}`;
-
-
+fetchHistory();
