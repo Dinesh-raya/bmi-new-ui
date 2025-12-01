@@ -10,6 +10,8 @@
   <div class="w-full max-w-xl bg-white p-8 rounded-lg shadow">
     <h1 class="text-2xl font-bold mb-4">BMI Calculator — Professional</h1>
 
+    
+
     <div class="grid grid-cols-2 gap-4">
       <!-- Metric height input -->
       <div id="height-metric">
@@ -40,6 +42,15 @@
           <option value="imperial">Imperial (ft/in & lbs)</option>
         </select>
       </div>
+      
+      <div>
+  <label class="block text-sm">Date of Birth</label>
+  <input type="date" id="dob" class="border p-2 w-full" max="<?= new Date().toISOString().split('T')[0]; ?>" />
+</div>
+      <p id="suggestedBMI" class="mt-2"></p>
+<p id="suggestedWeight"></p>
+<p id="bmiStatus"></p>
+
 
       <!-- Calculate button -->
       <div class="flex items-end">
