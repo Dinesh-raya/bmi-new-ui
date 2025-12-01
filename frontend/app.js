@@ -1,9 +1,12 @@
 const API = "https://bmi-new-ui.onrender.com";
 
+// Elements
 const unitSelect = document.getElementById("unit");
 const heightMetric = document.getElementById("height-metric");
 const heightImperial = document.getElementById("height-imperial");
+const errorEl = document.getElementById("error");
 
+// Toggle inputs for metric/imperial
 unitSelect.addEventListener("change", () => {
   if(unitSelect.value === "metric") {
     heightMetric.classList.remove("hidden");
@@ -14,21 +17,46 @@ unitSelect.addEventListener("change", () => {
   }
 });
 
+// BMI history (frontend only)
+const history = [];
+function addHistory(bmi, category) {
+  history.push({bmi, category});
+  let chart = document.getElementById("historyChart");
+  if(!chart){
+    chart = document.createElement("div");
+    chart.id = "historyChart";
+    chart.className = "mt-4 p-4 bg-gray-100 rounded";
+    document.querySelector("body > div").appendChild(chart);
+  }
+  chart.innerHTML = history.map((h,i)=>`#${i+1}: BMI=${h.bmi}, ${h.category}`).join("<br>");
+}
+
+// Calculate button click
 document.getElementById("calcBtn").addEventListener("click", async () => {
+  errorEl.textContent = "";
   const unit = unitSelect.value;
   let height, weight;
 
   weight = parseFloat(document.getElementById("weight").value);
-  if (!weight || weight <= 0) return alert("Enter valid weight");
+  if(!weight || weight <= 0){
+    errorEl.textContent = "Enter valid weight";
+    return;
+  }
 
-  if(unit === "metric") {
+  if(unit === "metric"){
     height = parseFloat(document.getElementById("height-cm").value);
-    if (!height || height <= 0) return alert("Enter valid height in cm");
+    if(!height || height <= 0){
+      errorEl.textContent = "Enter valid height in cm";
+      return;
+    }
   } else {
     const ft = parseFloat(document.getElementById("height-ft").value);
     const inch = parseFloat(document.getElementById("height-in").value);
-    if(ft < 0 || inch < 0) return alert("Enter valid height in ft/in");
-    height = ft * 12 + inch; // total inches
+    if(ft < 0 || inch < 0){
+      errorEl.textContent = "Enter valid height in ft/in";
+      return;
+    }
+    height = ft * 12 + inch; // total inches for backend
   }
 
   try {
@@ -40,28 +68,21 @@ document.getElementById("calcBtn").addEventListener("click", async () => {
     if(!res.ok) throw new Error(await res.text());
     const data = await res.json();
 
-    document.getElementById("bmiVal").textContent = data.bmi;
-    document.getElementById("category").textContent = data.category;
-    document.getElementById("range").textContent = data.healthy_range;
-    document.getElementById("result").classList.remove("hidden");
+    const bmiEl = document.getElementById("bmiVal");
+    const catEl = document.getElementById("category");
+    const rangeEl = document.getElementById("range");
+    const resultEl = document.getElementById("result");
+
+    if(bmiEl && catEl && rangeEl && resultEl){
+      bmiEl.textContent = data.bmi;
+      catEl.textContent = data.category;
+      rangeEl.textContent = data.healthy_range;
+      resultEl.classList.remove("hidden");
+    }
 
     addHistory(data.bmi, data.category);
+
   } catch(e) {
-    alert("Error: " + e.message);
+    errorEl.textContent = "Error: " + e.message;
   }
 });
-
-// Minimal BMI history chart
-const history = [];
-function addHistory(bmi, category) {
-  history.push({bmi, category});
-  const chart = document.getElementById("historyChart");
-  if(!chart) {
-    const div = document.createElement("div");
-    div.id = "historyChart";
-    div.className = "mt-4 p-4 bg-gray-100 rounded";
-    document.querySelector("body > div").appendChild(div);
-  }
-  document.getElementById("historyChart").innerHTML = history
-    .map((h,i)=>`#${i+1}: BMI=${h.bmi}, ${h.category}`).join("<br>");
-}
