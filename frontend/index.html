@@ -1,47 +1,31 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BMI Calculator</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-  <div class="w-full max-w-xl bg-white p-8 rounded-lg shadow">
-    <h1 class="text-2xl font-bold mb-4">BMI Calculator — Professional</h1>
-
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm">Height</label>
-        <input id="height" type="number" class="border p-2 w-full" placeholder="170" />
-      </div>
-      <div>
-        <label class="block text-sm">Weight</label>
-        <input id="weight" type="number" class="border p-2 w-full" placeholder="65" />
-      </div>
-      <div>
-        <label class="block text-sm">Unit</label>
-        <select id="unit" class="border p-2 w-full">
-          <option value="metric">Metric (cm/kg)</option>
-          <option value="imperial">Imperial (in/lbs)</option>
-        </select>
-      </div>
-      <div class="flex items-end">
-        <button id="calcBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Calculate</button>
-      </div>
-    </div>
-
-    <div id="result" class="mt-6 hidden">
-      <div class="p-4 bg-gray-100 rounded">
-        <p class="text-lg">BMI: <span id="bmiVal" class="font-semibold"></span></p>
-        <p>Category: <span id="category" class="font-semibold"></span></p>
-        <p>Healthy range: <span id="range" class="font-semibold"></span></p>
-      </div>
-    </div>
-
-    <div id="error" class="mt-4 text-red-600"></div>
+<div class="grid grid-cols-2 gap-4">
+  <div id="height-metric">
+    <label class="block text-sm">Height (cm)</label>
+    <input id="height-cm" type="number" class="border p-2 w-full" placeholder="170" />
   </div>
 
-  <script src="app.js"></script>
-</body>
-</html>
+  <div id="height-imperial" class="hidden">
+    <label class="block text-sm">Height</label>
+    <div class="flex space-x-2">
+      <input id="height-ft" type="number" class="border p-2 w-1/2" placeholder="5" />
+      <input id="height-in" type="number" class="border p-2 w-1/2" placeholder="10" />
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm">Weight</label>
+    <input id="weight" type="number" class="border p-2 w-full" placeholder="65" />
+  </div>
+
+  <div>
+    <label class="block text-sm">Unit</label>
+    <select id="unit" class="border p-2 w-full">
+      <option value="metric">Metric (cm/kg)</option>
+      <option value="imperial">Imperial (ft/in & lbs)</option>
+    </select>
+  </div>
+
+  <div class="flex items-end">
+    <button id="calcBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Calculate</button>
+  </div>
+</div>
