@@ -1,5 +1,5 @@
 // frontend/app.js
-const API = (window.API_URL || "").replace(/\/$/, "") || "https://your-backend-url.com";
+const API = (window.API_URL || "").replace(/\/$/, "") || "https://bmi-new-ui.onrender.com";
 
 document.getElementById("calcBtn").addEventListener("click", async () => {
   const height = parseFloat(document.getElementById("height").value);
