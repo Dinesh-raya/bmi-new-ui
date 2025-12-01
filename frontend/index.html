@@ -1,4 +1,16 @@
-<div class="grid grid-cols-2 gap-4">
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BMI Calculator</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-xl bg-white p-8 rounded-lg shadow">
+    <h1 class="text-2xl font-bold mb-4">BMI Calculator — Professional</h1>
+
+    <div class="grid grid-cols-2 gap-4">
   <div id="height-metric">
     <label class="block text-sm">Height (cm)</label>
     <input id="height-cm" type="number" class="border p-2 w-full" placeholder="170" />
@@ -29,3 +41,8 @@
     <button id="calcBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Calculate</button>
   </div>
 </div>
+
+
+  <script src="app.js"></script>
+</body>
+</html>
